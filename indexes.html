@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDF Toolkit</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Roboto', sans-serif;
+    }
+
+    body {
+      background-color: #0b0c10;
+      color: #fff;
+      overflow-x: hidden;
+      position: relative;
+    }
+    .container {
+      max-width: 800px;
+      margin: 4rem auto;
+      padding: 2rem;
+      text-align: center;
+    }
+    h1 {
+      margin-bottom: 2rem;
+      font-size: 2.5rem;
+      color: #f54242;
+    }
+    .buttons button {
+      margin: 0.5rem;
+      padding: 1rem 2rem;
+      font-size: 1.1rem;
+      background-color: #f54242;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .buttons button:hover,
+    .buttons button.active {
+      background-color: #a82727;
+      transform: scale(1.05);
+    }
+    .upload-section, .result-section {
+      margin-top: 2rem;
+    }
+    input[type="file"] {
+      padding: 1rem;
+      border: 2px dashed #f54242;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.05);
+      color: #fff;
+      width: 100%;
+    }
+    .action-buttons button {
+      margin-top: 1rem;
+      padding: 1rem 2rem;
+      font-size: 1.1rem;
+      background-color: #f54242;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .action-buttons button:hover {
+      background-color: #a82727;
+      transform: scale(1.05);
+    }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      margin-top: 3rem;
+    }
+    .feature-box {
+      background: #1f1f1f;
+      padding: 1rem;
+      border-radius: 15px;
+      transition: 0.3s ease;
+      transform-style: preserve-3d;
+    }
+    .feature-box:hover {
+      transform: perspective(600px) rotateY(10deg);
+      background-color: #272727;
+    }
+    .cursor-effect {
+      position: fixed;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      width: 100%;
+      height: 100%;
+      z-index: 9999;
+      background: radial-gradient(circle at var(--x) var(--y), rgba(255,255,255,0.1) 0%, transparent 40%);
+    }
+  </style>
+</head>
+<body>
+  <div class="cursor-effect"></div>
+  <div class="container">
+    <h1>PDF Toolkit</h1>
+    <div class="buttons">
+      <button onclick="selectAction('compress')">Compress PDF</button>
+      <button onclick="selectAction('merge')">Merge PDFs</button>
+      <button onclick="selectAction('wordtopdf')">Word to PDF</button>
+      <button onclick="selectAction('pdftoword')">PDF to Word</button>
+    </div>
+
+    <div class="upload-section">
+      <input type="file" id="fileInput" multiple>
+      <div class="action-buttons">
+        <button onclick="uploadFile()">Upload</button>
+        <button onclick="downloadFile()">Download</button>
+      </div>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-box">🔧 Compresses PDF to reduce size</div>
+      <div class="feature-box">📚 Merge multiple PDFs</div>
+      <div class="feature-box">📝 Convert Word to PDF</div>
+      <div class="feature-box">📄 Convert PDF to Word</div>
+      <div class="feature-box">⚡ Fast Processing</div>
+      <div class="feature-box">🔒 Secure Conversion</div>
+      <div class="feature-box">🗂️ Bulk File Support</div>
+      <div class="feature-box">🎨 Clean and Modern UI</div>
+    </div>
+  </div>
+
+  <script>
+    let selectedAction = '';
+    function selectAction(action) {
+      selectedAction = action;
+      document.querySelectorAll('.buttons button').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+    }
+
+    function uploadFile() {
+      if (!selectedAction) return alert('Please select an action first!');
+      const input = document.getElementById('fileInput');
+      if (!input.files.length) return alert('Please upload a file!');
+
+      const formData = new FormData();
+      for (let file of input.files) formData.append('files', file);
+
+      fetch(`/${selectedAction}`, {
+        method: 'POST',
+        body: formData
+      })
+      .then(res => res.blob())
+      .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${selectedAction}_result.${selectedAction.includes('word') ? 'docx' : 'pdf'}`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      })
+      .catch(err => alert('Error processing file'));
+    }
+
+    function downloadFile() {
+      alert('File downloaded after upload');
+    }
+
+    document.addEventListener('mousemove', (e) => {
+      document.documentElement.style.setProperty('--x', `${e.clientX}px`);
+      document.documentElement.style.setProperty('--y', `${e.clientY}px`);
+    });
+  </script>
+</body>
+</html>
